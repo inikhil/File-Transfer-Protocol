@@ -1,0 +1,123 @@
+														   FTP Implementation
+---------------------------------------------------------------------------------------------------------------------------------------------						
+														   CS349 : Networks Lab
+														   	  NIkhil Agarwal
+															   IIT Guwahati
+															   Date:14/03/14
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+														    Introduction
+
+A FTP server handles the process of transferring files from one computer to another.  The FTP protocol defines how FTP programs should work together when sharing files. It uses the client/server model in its implementation. This means that in order to use an FTP server, we need a FTP client. In most cases the FTP server program offers files to the client program, but it also makes provision for the client to upload files.
+
+As with all protocols that uses the client server model, the process of sending and receiving files is done through the request/response method and involves commands. The client usually makes the request and the server responds. In order for a client to connect to a server, the FTP server application needs to be active and listening on a port. 
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+															  Code compilation
+
+Our folder contain two subfolders - one is named FTP_client which contains the client implementation and the other one is named FTP_server. To compile , go to the corresponding subfolders using cd command and then
+
+                                                               On server side
+
+Write the following code: gcc server.c -w
+After compilation write: ./a.out PortNumber
+For example , if we want to connect to Port Number 8879 , we write ./a.out 8879
+
+															   On client side 
+
+Write the following code: gcc client.c -w
+After compilation write: ./a.out IP Address PortNumber
+For example, if we want to connect to IP Address 10.1.2.149 and Port Number 8891 , we write :  ./a.out 10.1.2.49 8891 	
+
+                                                        This completes our compilation portion
+---------------------------------------------------------------------------------------------------------------------------------------------------
+                                                           Basic walk through the code
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+Firstly, we created sockets on the client and server side and then binded them accordingly . For this various socket functions and bind functions were used such as socket() ,accept() , listen() , connect() using SOCK_STREAM. We use SOCK_STREAM as we want to use TCP connections.
+
+Then the big task that lied ahead of us was to implement various FTP commands .
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+													Commands implemented in Client - Server
+
+lls    : to lists content of client current directory 
+lcd    : to change client current directory, usage: lcd dir_name 
+lpwd   : to display path of client current directory 
+ls     : to lists content of server current directory 
+cd     : to change server current directory, usage: cd dir_name
+pwd    : to display path of server current directory 
+gets   : to download file from server, file name specified, usage: gets file_name
+puts   : to upload file to server, file name specified, usage: puts file_name
+mgets  : to download multiple files from server, file name specified, usage: mgets file_name1,file_name2
+mputs  : to upload multiple files to server, file name specified, usage: mputs file_name1,file_name2
+exit   : to exit the connection 
+clear  : to clear command window 
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+lls - used to list content of client current directory. Here we take the command and argument given by user and we pass the argument to the system function . This system function finds all the files in that directory and print it in the terminal.
+
+lcd - used to change client current directory. We use the same system function for this operation . The system function changes the directory if the argument is valid and returns the new directory.
+
+lpwd - used to display path of client current directory . We use the same system function which displays the current working directory.
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+ Now the things become little more complicated as we have to send the client's input command and arguments to the server. So we proceed as follows -
+
+1. The client sends input commands and arguments to the server
+2. The server then responds accordingly and returns the message to the client.
+3. The client then displays the message received by the server.
+
+ls -  used to lists content of server's current directory . After server receives the ls command it checks for the argument . If argument is valid , then it opens a file and lists all the contents of the directory in that file . The file is then transferred to the client through send message and the client displays it in its terminal.
+
+cd - used to change server current directory.  After server receives the ls command it checks for the argument . If argument is valid , then it calls chdir function. It then passes its current directory to the client. The client then displays the same at its terminal.
+
+pwd - used to display path of server current directory .  After server receives the ls command it passes its current working directory to the client and the client displays the same in its terminal.
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+gets - used to download file from server. This is one of our main FTP commands. After receiving the FILE name , the server tries to open this file in READ mode. If the file is opened successfully it informs the client about the size of the file the server is going to transfer. Then the client opens a file in WRITE mode and it starts writing the file received by the server.
+
+puts - used to upload file to server. This is again one of our main FTP commands. After receiving the FILE name , the client tries to open this file in READ mode. If the file is opened successfully it informs the server about the size of the file the client is going to transfer. Then the server opens a file in WRITE mode and it starts writing the file received by the client.
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+mgets - used to download multiple files from server. It basically functions same as gets. The only additional thing that we need to keep in mind is that we use a strtok to separate multiple files using delimiter and for each file we perform the gets function. 
+
+The important cases to note here are as follows - 
+
+(i) If we give only one file name to our mgets FTP command and if the file is valid , it transfers it .
+
+(ii) If we give two file names separated by the delimiter (,) and the first file doesn't exist in the server , our program will display that all files don't exist in server irrespective of the existence of second file .ie., no file is transferred.
+
+(iii) If we give two file names separated by the delimiter (,) and the first file exists in the server then it transfers the first file. Furthermore , if the second file doesn't exist in the server , then our program will display that all files don't exist in server.
+
+(iv) If we give multiple file names separated by the delimiter(,) then our program transfers all the valid files that exist in the server and stops when we encounter the first non- existent file in the server.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+mputs - used to download multiple files from client. It basically functions same as puts. The only additional thing that we need to keep in mind is that we use a strtok to separate multiple files using delimiter and for each file we perform the puts function.
+
+The important cases to note here are as follows -  
+
+(i) If we give only one file name to our mputs FTP command and if the file is valid , it transfers it .
+
+(ii) If we give two file names separated by the delimiter (,) and the first file doesn't exist in the client , then our program will display that all input files don't exist in client irrespective of the existence of second file in the client . Therefore, no file is transferred.
+
+(iii) If we give two file names separated by the delimiter (,) and the first file exists in the client then it transfers the first file. Furthermore , if the second file doesn't exist in the client , then our program will display that all files don't exist in client.
+
+(iv) If we give multiple file names separated by the delimiter(,) then our program transfers all the valid files that exist in the client and stops when we encounter the first non- existent file in the client.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+																	Results
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+Results are displayed in a pics - folder. They are named accordingly . Wethe have covered both invalid and valid cases of the FTP commands. In cases of gets , puts , mgets, mputs FTP commands , we have not displayed the output of the files in the terminal. We have only displayed the sizes of the files received . This is because if we will use the program to transfer video files , then it will print irrelevant binary symbols in the terminal which is not a nice sight to watch. So to check the output in these cases , please go to the corresponding folders (client/server) to check the successful transmission of the files. Input any file (.mkv/.txt/.cpp) on your own to test the successful transmission.
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+P.S. The client, server and readme files are best viewed in Sublime Text.
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+

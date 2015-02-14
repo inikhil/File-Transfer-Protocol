@@ -1,0 +1,4 @@
+select * from nik;
+select * from nik where a<=12;
+select c from nik where 12>=a;
+select * from nik where a=a; 
